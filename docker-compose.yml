@@ -1,0 +1,37 @@
+version: "3.5"
+services:
+
+  mysql:
+    image: mysql:5.7
+    container_name: ak-dev-mysql
+    working_dir: /application
+    volumes:
+      - .:/application
+      - ./storage-db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=ak-dev
+      - MYSQL_USER=ak-dev_user
+      - MYSQL_PASSWORD=ak-dev_pass
+    ports:
+      - "8083:3306"
+
+  webserver:
+    build: ./docker/nginx/
+    container_name: ak-dev-webserver
+    working_dir: /application
+    volumes:
+      - ./src:/application
+      - ./docker/nginx/log:/var/log/nginx
+    ports:
+      - "8081:80"
+      - "8085:21"
+
+  php-fpm:
+    build: ./docker/php-fpm/
+    container_name: ak-dev-php-fpm
+    working_dir: /application
+    ports:
+      - "8086:21"
+    volumes:
+      - ./src:/application
