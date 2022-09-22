@@ -1,20 +1,21 @@
 {
-    "name": "ak-dev-todo/backend",
-    "description": "test application",
-    "type": "project",
-    "autoload": {
-        "psr-4": {
-            "AkDevTodo\\Backend\\": "src/"
-        }
-    },
-    "authors": [
-        {
-            "name": "vcf"
-        }
-    ],
-    "minimum-stability": "dev",
-    "require": {
-        "firebase/php-jwt": "dev-main",
-        "vlucas/phpdotenv": "5.4.x-dev"
+  "name": "ak-dev-todo/backend",
+  "description": "test application",
+  "type": "project",
+  "autoload": {
+    "psr-4": {
+      "AkDevTodo\\Backend\\": "src/"
     }
+  },
+  "authors": [
+    {
+      "name": "vcf"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "php": "^8.0",
+    "firebase/php-jwt": "dev-main",
+    "vlucas/phpdotenv": "5.4.x-dev"
+  }
 }
