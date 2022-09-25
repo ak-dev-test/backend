@@ -7,14 +7,12 @@ use AkDevTodo\Backend\Exceptions\CustomException;
 use AkDevTodo\Backend\Exceptions\IncorrectRouteException;
 use AkDevTodo\Backend\Tools\Env;
 use AkDevTodo\Backend\Tools\Response;
-use AkDevTodo\Backend\Tools\Route;
+use AkDevTodo\Backend\Tools\Router;
 use AkDevTodo\Backend\Tools\UriHelper;
 
 class App
 {
     private static ?self $instance = null;
-    private Route $route;
-    private Controller $controller;
     private UriHelper $uriHelper;
 
 
@@ -62,29 +60,11 @@ class App
 
         $this
             ->setExceptionHandler()
-            ->setUriHelper(new UriHelper())
-            ->setRoute(new Route($this->uriHelper))
-            ->run();
+            ->setUriHelper(new UriHelper());
+
+        Router::loadRoute();
     }
 
-    /**
-     * @return Route
-     */
-    public function getRoute(): Route
-    {
-        return $this->route;
-    }
-
-    /**
-     * @param Route $route
-     * @return $this
-     */
-    private function setRoute(Route $route): App
-    {
-        $this->route = $route;
-
-        return $this;
-    }
 
     /**
      * @return UriHelper
@@ -111,6 +91,10 @@ class App
      */
     private function setExceptionHandler(): App
     {
+        if (Env::get('DEBUG')) {
+            return $this;
+        }
+
         set_exception_handler(function (CustomException $e) {
             http_response_code($e->getCode());
 
@@ -127,29 +111,25 @@ class App
     }
 
     /**
+     * @param string $controllerName
+     * @param string $action
+     * @param array $parameters
      * @return void
      * @throws IncorrectRouteException
      */
-    private function run()
+    public function run(string $controllerName, string $action, array $parameters)
     {
         try {
-            $reflectionClass = new \ReflectionClass($this->getRoute()->getControllerName());
+            $reflectionClass = new \ReflectionClass($controllerName);
             $controller = $reflectionClass->newInstance();
         } catch (\ReflectionException $e) {
             throw new IncorrectRouteException();
         }
 
-        $method = $this->getRoute()->getMethod();
-
-        [
-            'id' => $id,
-            'arguments' => $arguments
-        ] = $this->getRoute()->getArguments();
-
-        $args = $id === null ? [$arguments] : [$id, $arguments];
+        $arguments = array_merge($parameters, [$this->getUriHelper()->queryParams()]);
 
         /** @var Response $response */
-        $response = call_user_func_array([$controller, $method], $args);
+        $response = call_user_func_array([$controller, $action], $arguments);
 
         echo $response;
     }
