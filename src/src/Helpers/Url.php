@@ -1,10 +1,10 @@
 <?php
 
-namespace AkDevTodo\Backend\Tools;
+namespace AkDevTodo\Backend\Helpers;
 
 use \AkDevTodo\Backend\Defines\Request;
 
-class UriHelper
+class Url
 {
     private string $uri;
     private ?array $queryParams;

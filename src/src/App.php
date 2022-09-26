@@ -2,19 +2,17 @@
 
 namespace AkDevTodo\Backend;
 
-use AkDevTodo\Backend\Controllers\Controller;
 use AkDevTodo\Backend\Exceptions\CustomException;
 use AkDevTodo\Backend\Exceptions\IncorrectRouteException;
+use AkDevTodo\Backend\Helpers\Url;
 use AkDevTodo\Backend\Tools\Env;
 use AkDevTodo\Backend\Tools\Response;
 use AkDevTodo\Backend\Tools\Router;
-use AkDevTodo\Backend\Tools\UriHelper;
 
 class App
 {
     private static ?self $instance = null;
-    private UriHelper $uriHelper;
-
+    private Url $urlHelper;
 
     protected function __construct()
     {
@@ -60,27 +58,27 @@ class App
 
         $this
             ->setExceptionHandler()
-            ->setUriHelper(new UriHelper());
+            ->setUrlHelper(new Url());
 
         Router::loadRoute();
     }
 
 
     /**
-     * @return UriHelper
+     * @return Url
      */
-    public function getUriHelper(): UriHelper
+    public function getUrlHelper(): Url
     {
-        return $this->uriHelper;
+        return $this->urlHelper;
     }
 
     /**
-     * @param UriHelper $uriHelper
+     * @param Url $urlHelper
      * @return $this
      */
-    public function setUriHelper(UriHelper $uriHelper): App
+    public function setUrlHelper(Url $urlHelper): App
     {
-        $this->uriHelper = $uriHelper;
+        $this->urlHelper = $urlHelper;
 
         return $this;
     }
@@ -91,7 +89,7 @@ class App
      */
     private function setExceptionHandler(): App
     {
-        if (Env::get('DEBUG')) {
+        if (filter_var(Env::get('DEBUG'), FILTER_VALIDATE_BOOLEAN)) {
             return $this;
         }
 
@@ -105,6 +103,7 @@ class App
                 ->setMessage($e->getMessage());
 
             echo $response;
+            exit();
         });
 
         return $this;
@@ -126,7 +125,7 @@ class App
             throw new IncorrectRouteException();
         }
 
-        $arguments = array_merge($parameters, [$this->getUriHelper()->queryParams()]);
+        $arguments = array_merge($parameters, [$this->getUrlHelper()->queryParams()]);
 
         /** @var Response $response */
         $response = call_user_func_array([$controller, $action], $arguments);
