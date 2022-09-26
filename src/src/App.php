@@ -4,6 +4,7 @@ namespace AkDevTodo\Backend;
 
 use AkDevTodo\Backend\Exceptions\CustomException;
 use AkDevTodo\Backend\Exceptions\IncorrectRouteException;
+use AkDevTodo\Backend\Helpers\Arr;
 use AkDevTodo\Backend\Helpers\Url;
 use AkDevTodo\Backend\Tools\Env;
 use AkDevTodo\Backend\Tools\Response;
@@ -13,6 +14,8 @@ class App
 {
     private static ?self $instance = null;
     private Url $urlHelper;
+
+    private array $data = [];
 
     protected function __construct()
     {
@@ -131,5 +134,29 @@ class App
         $response = call_user_func_array([$controller, $action], $arguments);
 
         echo $response;
+        exit();
     }
+
+
+    /**
+     * @param string $key
+     * @param $data
+     * @return void
+     */
+    public function set(string $key, $data): void
+    {
+        $this->data[$key] = $data;
+    }
+
+    /**
+     * @param string $key
+     * @return mixed|null
+     */
+    public function get(string $key): mixed
+    {
+        return Arr::get($this->data, $key);
+
+    }
+
+
 }

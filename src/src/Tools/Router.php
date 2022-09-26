@@ -5,6 +5,8 @@ namespace AkDevTodo\Backend\Tools;
 use AkDevTodo\Backend\App;
 use \AkDevTodo\Backend\Defines\Request;
 use AkDevTodo\Backend\Exceptions\IncorrectRouteException;
+use AkDevTodo\Backend\Helpers\Arr;
+use AkDevTodo\Backend\MiddleWare\AbstractMiddleWare;
 
 class Router
 {
@@ -122,7 +124,21 @@ class Router
             }
         }
 
-        [$controller, $action] = $config;
+        $controller = Arr::get($config, 0);
+        $action = Arr::get($config, 1);
+        $middleWares = Arr::get($config, 2, []);
+
+        foreach ($middleWares as $middleWareName) {
+            try {
+                $reflectionClass = new \ReflectionClass($middleWareName);
+                $middleWare = $reflectionClass->newInstance();
+            } catch (\ReflectionException $e) {
+                throw new IncorrectRouteException();
+            }
+
+            /** @var $middleWare AbstractMiddleWare */
+            $middleWare->handle();
+        }
 
         App::getInstance()->run($controller, $action, $parameters);
     }

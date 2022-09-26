@@ -8,6 +8,7 @@ use AkDevTodo\Backend\Models\User;
 use AkDevTodo\Backend\Reps\UserRep;
 use AkDevTodo\Backend\Tools\Env;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 class AuthService
 {
@@ -62,5 +63,19 @@ class AuthService
         ]);
 
         return [];
+    }
+
+    /**
+     * @param string $token
+     * @return array
+     */
+    public function verifyToken(string $token): array
+    {
+        try {
+            $data = JWT::decode($token, new Key(Env::get('JWT_KEY'), Env::get('JWT_ALG')));
+        } catch (\Exception $exception) {
+            throw new AccessDeniedException();
+        }
+        return (array)$data;
     }
 }
