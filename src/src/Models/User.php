@@ -5,6 +5,8 @@ namespace AkDevTodo\Backend\Models;
 class User extends Model
 {
     private int $id;
+    private string $email;
+    private string $password;
 
     /**
      * @return int
@@ -53,6 +55,4 @@ class User extends Model
     {
         $this->password = $password;
     }
-    private string $email;
-    private string $password;
 }

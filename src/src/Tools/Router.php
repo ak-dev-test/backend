@@ -124,6 +124,7 @@ class Router
             }
         }
 
+
         $controller = Arr::get($config, 0);
         $action = Arr::get($config, 1);
         $middleWares = Arr::get($config, 2, []);

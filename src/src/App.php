@@ -2,10 +2,12 @@
 
 namespace AkDevTodo\Backend;
 
+use AkDevTodo\Backend\Exceptions\AccessDeniedException;
 use AkDevTodo\Backend\Exceptions\CustomException;
 use AkDevTodo\Backend\Exceptions\IncorrectRouteException;
 use AkDevTodo\Backend\Helpers\Arr;
 use AkDevTodo\Backend\Helpers\Url;
+use AkDevTodo\Backend\Models\User;
 use AkDevTodo\Backend\Tools\Env;
 use AkDevTodo\Backend\Tools\Response;
 use AkDevTodo\Backend\Tools\Router;
@@ -119,7 +121,7 @@ class App
      * @return void
      * @throws IncorrectRouteException
      */
-    public function run(string $controllerName, string $action, array $parameters)
+    public function run(string $controllerName, string $action, array $parameters): void
     {
         try {
             $reflectionClass = new \ReflectionClass($controllerName);
@@ -128,7 +130,15 @@ class App
             throw new IncorrectRouteException();
         }
 
-        $arguments = array_merge($parameters, [$this->getUrlHelper()->queryParams()]);
+        $arguments = [];
+
+        if ($parameters) {
+            $arguments = array_merge($arguments, $parameters);
+        }
+
+        if ($this->getUrlHelper()->queryParams()) {
+            $arguments = array_merge($arguments, [$this->getUrlHelper()->queryParams()]);
+        }
 
         /** @var Response $response */
         $response = call_user_func_array([$controller, $action], $arguments);
@@ -158,5 +168,18 @@ class App
 
     }
 
+    /**
+     * @return User
+     * @throws AccessDeniedException
+     */
+    public function user(): User
+    {
+        $user = $this->get('user');
+        if ($user === null) {
+            throw new AccessDeniedException();
+        }
+
+        return $user;
+    }
 
 }

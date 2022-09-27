@@ -2,32 +2,65 @@
 
 namespace AkDevTodo\Backend\Controllers;
 
+use AkDevTodo\Backend\App;
+use AkDevTodo\Backend\Exceptions\AccessDeniedException;
+use AkDevTodo\Backend\Exceptions\NotFoundException;
+use AkDevTodo\Backend\Services\TodoService;
 use AkDevTodo\Backend\Tools\Response;
 
 class TodoController extends Controller
 {
 
+    /**
+     * @return Response
+     * @throws AccessDeniedException
+     */
     public function getAll(): Response
     {
+        $user = App::getInstance()->user();
+        $todoService = new TodoService();
+        $todoList = $todoService->getAll(['user_id' => $user->getId()]);
+        $this->response->setData($todoList);
+
         return $this->response;
     }
 
-    public function getOne($id): Response
+    /**
+     * @param int $id
+     * @return Response
+     * @throws AccessDeniedException
+     * @throws NotFoundException
+     */
+    public function getOne(int $id): Response
     {
-        // TODO: Implement getOne() method.
+        $user = App::getInstance()->user();
+        $todoService = new TodoService();
+        $todo = $todoService->getOne($id, ['user_id' => $user->getId()]);
+        $this->response->setData([$todo]);
+
         return $this->response;
     }
 
-    public function create($params): Response
+    /**
+     * @param array $params
+     * @return Response
+     * @throws AccessDeniedException
+     */
+    public function create(array $params): Response
     {
+        $user = App::getInstance()->user();
+        $params['user_id'] = $user->getId();
 
-        // TODO: Implement create() method.
+        $todoService = new TodoService();
+        $todoService->create($params);
+
         return $this->response;
     }
 
     public function update($id, $params): Response
     {
-        // TODO: Implement update() method.
+
+
         return $this->response;
     }
 
