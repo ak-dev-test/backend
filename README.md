@@ -1,9 +1,16 @@
-# test api
-### 1. run docker containers
+## test api
+
+### 1. Run docker containers
+
 `docker-compose up -d`
-### 2. Go into php-fpm container with
-`docker-compose exec php-fpm bash`
-###### and
-###### 1. install all packages
-`composer install`
-###### 2. execute migrations
+
+### 2. Execute SQL manually
+
+Open database-tool (MySql Workbench, DBeaver etc.), connect to the database (use connections parameters from
+docker-compose.yml) and execute sql one by one
+
+### 3. Install all packages
+
+Enter into php container with command `docker-compose exec php-fpm bash` and execute `composer install` inside
+
+#### Done. Application ready for use
