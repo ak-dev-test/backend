@@ -52,9 +52,9 @@ class Rep
 
     /**
      * @param array $data
-     * @return array|void
+     * @return void
      */
-    public function create(array $data)
+    public function create(array $data): void
     {
         $data = $this->sanitize($data);
         $columns = array_keys($data);
@@ -65,7 +65,36 @@ class Rep
 
         $query = "INSERT INTO `$this->table` ( $columns ) values ( $bindParams )";
 
+        $this->db->execute($query, $data);
+    }
+
+    /**
+     * @param int $id
+     * @param array $data
+     * @return array|void
+     */
+    public function update(int $id, array $data)
+    {
+        $data = $this->sanitize($data);
+
+        $columns = array_keys($data);
+        $changeColumns = array_map(fn($item) => "`$item` = :$item", $columns);
+        $fields = implode(', ', $changeColumns);
+
+        $query = "UPDATE `$this->table` SET $fields WHERE `id` = '$id'";
+
         return $this->db->execute($query, $data);
+    }
+
+    /**
+     * @param int $id
+     * @return void
+     */
+    public function delete(int $id): void
+    {
+        $query = "DELETE FROM `$this->table` WHERE `id` = '$id'";
+
+        $this->db->execute($query);
     }
 
 }

@@ -17,9 +17,8 @@ class TodoController extends Controller
      */
     public function getAll(): Response
     {
-        $user = App::getInstance()->user();
         $todoService = new TodoService();
-        $todoList = $todoService->getAll(['user_id' => $user->getId()]);
+        $todoList = $todoService->getAll();
         $this->response->setData($todoList);
 
         return $this->response;
@@ -33,9 +32,8 @@ class TodoController extends Controller
      */
     public function getOne(int $id): Response
     {
-        $user = App::getInstance()->user();
         $todoService = new TodoService();
-        $todo = $todoService->getOne($id, ['user_id' => $user->getId()]);
+        $todo = $todoService->getOne($id);
         $this->response->setData([$todo]);
 
         return $this->response;
@@ -59,14 +57,24 @@ class TodoController extends Controller
 
     public function update($id, $params): Response
     {
-
+        $todoService = new TodoService();
+        $todo = $todoService->update($id, $params);
+        $this->response->setData([$todo]);
 
         return $this->response;
     }
 
+    /**
+     * @param $id
+     * @return Response
+     * @throws AccessDeniedException
+     * @throws NotFoundException
+     */
     public function delete($id): Response
     {
-        // TODO: Implement delete() method.
+        $todoService = new TodoService();
+        $todoService->delete($id);
+
         return $this->response;
     }
 }

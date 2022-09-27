@@ -2,17 +2,12 @@
 
 namespace AkDevTodo\Backend\Services;
 
+use AkDevTodo\Backend\App;
 use AkDevTodo\Backend\Exceptions\AccessDeniedException;
-use AkDevTodo\Backend\Exceptions\EmailBusyException;
 use AkDevTodo\Backend\Exceptions\NotFoundException;
 use AkDevTodo\Backend\Helpers\Arr;
 use AkDevTodo\Backend\Models\Todo;
-use AkDevTodo\Backend\Models\User;
 use AkDevTodo\Backend\Reps\TodoRep;
-use AkDevTodo\Backend\Reps\UserRep;
-use AkDevTodo\Backend\Tools\Env;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 
 class TodoService
 {
@@ -23,17 +18,21 @@ class TodoService
     public function create(array $data): bool
     {
         $todoRep = new TodoRep();
-
         $todoRep->create($data);
 
         return true;
     }
 
-
-    public function getAll(array $params): array
+    /**
+     * @return array
+     * @throws AccessDeniedException
+     */
+    public function getAll(): array
     {
+        $user = App::getInstance()->user();
         $todoRep = new TodoRep();
-        return $todoRep->findBy($params);
+
+        return $todoRep->findBy(['user_id' => $user->getId()]);
     }
 
 
@@ -44,7 +43,7 @@ class TodoService
      * @throws AccessDeniedException
      * @throws NotFoundException
      */
-    public function getOne(int $id, array $params): Todo
+    public function getOne(int $id): Todo
     {
         $todoRep = new TodoRep();
         $todolist = $todoRep->findBy(['id' => $id]);
@@ -55,11 +54,44 @@ class TodoService
 
         $todo = $todolist[0];
 
-        if ($todo->user_id !== Arr::get($params, 'user_id')) {
+        if ($todo->user_id !== App::getInstance()->user()->getId()) {
             throw new AccessDeniedException();
         }
 
         return $todo;
+    }
+
+    /**
+     * @param int $id
+     * @param array $data
+     * @return Todo
+     * @throws AccessDeniedException
+     * @throws NotFoundException
+     */
+    public function update(int $id, array $data): Todo
+    {
+        $todo = $this->getOne($id);
+
+        $todoRep = new TodoRep();
+        $user = App::getInstance()->user();
+        $data = array_merge($data, ['user_id' => $user->getId()]);
+        $todoRep->update($id, $data);
+
+        return $this->getOne($id);
+    }
+
+    /**
+     * @param int $id
+     * @return void
+     * @throws AccessDeniedException
+     * @throws NotFoundException
+     */
+    public function delete(int $id): void
+    {
+        $todo = $this->getOne($id);
+
+        $todoRep = new TodoRep();
+        $todoRep->delete($id);
     }
 
 }
